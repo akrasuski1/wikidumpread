@@ -71,7 +71,6 @@ def get(datafile, indexfile, query=None):
     found = None
     while lo < hi:
         mi = (lo + hi) // 2
-        print(lo, hi, mi)
         name2offset = read(zf, files[mi])
         if query in name2offset:
             found = name2offset[query]
