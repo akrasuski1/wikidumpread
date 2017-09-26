@@ -35,3 +35,12 @@ Radare2
 | released                   = 
 0:00.17 21484
 ```
+
+One more thing I can recommend if you want to use it, is adding a shorter
+alias for the long command to `.bash_aliases`:
+```
+$ tail -n 1 ~/.bash_aliases 
+alias wikiget='python3 ~/whatever/wikidump/wiki.py get ~/whatever/wikidump/enwiki-20170820-pages-articles-multistream.xml.bz2 ~/whatever/wikidump/index20170820'
+$ wikiget Radare2
+[...results...]
+```
