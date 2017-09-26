@@ -7,30 +7,41 @@ from xml.etree.ElementTree import XMLParser
 
 
 def build(orig_index, new_index):
-    bz = bz2.decompress(open(orig_index, "rb").read()).decode("utf-8")
+    bz = bz2.BZ2File(orig_index, "r")
 
-    name2off = {}
+    print("Decompressing and parsing index...")
+    lines = []
+    s = b""
+    while True:
+        rd = bz.read(65536)
+        if not rd:
+            break
+        s += rd
+        arr = s.split(b"\n")
+        for line in arr[:-1]:
+            f = line.find(b":")
+            f2 = line.find(b":", f + 1) + 1
+            lines.append(line[f2:] + b"\x00" + line[:f])
+            if len(lines) % 100000 == 0:
+                print("%d pages..." % len(lines))
+        s = arr[-1]
 
-    for line in bz.splitlines():
-        f = line.find(":")
-        offset = int(line[:f])
-        f2 = line.find(":", f + 1) + 1
-        name = line[f2:]
-        name2off[name] = offset
+    print("Sorting index lines...")
+    lines.sort()
 
-    PER_FILE = 10 * 1000
+    print("Creating index...")
+    PER_FILE = 2000
     zf = zipfile.ZipFile(new_index, "w", zipfile.ZIP_DEFLATED)
-    names = sorted(name2off)
     index = 0
     i = 0
-    while index < len(names):
-        s = []
-        for name in names[index:index+PER_FILE]:
-            s.append("%d:%s" % (name2off[name], name))
-        zf.writestr("%08d" % i, "\n".join(s))
+    while index < len(lines):
+        if index % 100000 == 0:
+            print("%d/%d..." % (index, len(lines)))
+        zf.writestr("%08d" % i, b"\n".join(lines[index:index+PER_FILE]))
         index += PER_FILE
         i += 1
 
+    print("Finalizing index...")
     zf.close()
 
 
@@ -39,9 +50,9 @@ def read(indexzf, which):
     res = {}
     for line in f.readlines():
         line = line.decode("utf-8").strip()
-        colon = line.find(":")
-        offset = int(line[:colon])
-        name = html.unescape(line[colon+1:])
+        colon = line.rfind("\x00")
+        offset = int(line[colon+1:])
+        name = html.unescape(line[:colon])
         res[name] = offset
     return res
 
@@ -55,16 +66,10 @@ def get(datafile, indexfile, query=None):
                 print(name)
         return
 
-    # TODO DEBUG, slow
-    for i, f in enumerate(files):
-        r = read(zf, f)
-        if query in r:
-            print("Yay in", i, r[query])
-
     lo = 0
     hi = len(files) - 1
     found = None
-    while lo != hi:
+    while lo < hi:
         mi = (lo + hi) // 2
         print(lo, hi, mi)
         name2offset = read(zf, files[mi])
