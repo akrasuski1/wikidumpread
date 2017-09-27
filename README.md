@@ -7,7 +7,7 @@ It comes with an index, but it's sorted by page id, which is useless
 for searching purposes - we need to make our own, just one time:
 
 ```
-$ python3 wiki.py build ~/Downloads/enwiki-20170820-pages-articles-multistream-index.txt.bz2 ~/wiki-index
+$ python3 wiki.py build ~/Downloads/enwiki-20170820-pages-articles-multistream-index.txt.bz2 ~/index
 ```
 This operation should take about 2 minutes - it could be slightly quicker,
 but almost half of the time is taken by bz2 decompression itself. Instead
@@ -22,7 +22,7 @@ Python string overhead, for example, "abc" takes 52 bytes)
 
 Afterwards, searching the dump is instantaneous and uses next to no RAM:
 ```
-$ /usr/bin/time -f "%E %M" python3 wiki.py get ~/Downloads/enwiki-20170820-pages-articles-multistream.xml.bz2 ~/wiki-index "Radare2" | head -n 20
+$ /usr/bin/time -f "%E %M" python3 wiki.py get ~/Downloads/enwiki-20170820-pages-articles-multistream.xml.bz2 ~/index "Radare2" | head -n 10
 Radare2
 {{Infobox Software
 | name                       = Radare2
