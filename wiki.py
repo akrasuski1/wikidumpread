@@ -4,6 +4,7 @@ import bz2
 import sys
 import html
 from xml.etree.ElementTree import XMLParser
+import markup
 
 
 def build(orig_index, new_index):
@@ -57,7 +58,7 @@ def read(indexzf, which):
     return res
 
 
-def get(datafile, indexfile, query=None):
+def get(datafile, indexfile, query=None, raw=False):
     zf = zipfile.ZipFile(indexfile, "r")
     files = sorted(zf.namelist())
     if query is None:
@@ -133,7 +134,10 @@ def get(datafile, indexfile, query=None):
         parser.feed(data)
 
     print(target.title)
-    print(target.text)
+    text = target.text
+    if not raw:
+        text = markup.change(text)
+    print(text)
     
 
 def main():
@@ -146,7 +150,8 @@ def main():
         datafile = sys.argv[2]
         indexfile = sys.argv[3]
         query = sys.argv[4]
-        get(datafile, indexfile, query)
+        raw = "--raw" in sys.argv
+        get(datafile, indexfile, query, raw)
     elif cmd == "list":
         datafile = sys.argv[2]
         indexfile = sys.argv[3]
