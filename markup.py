@@ -15,6 +15,7 @@ BOLD = "\033[;1m"
 ITALIC = "\033[;3m"
 RESET = "\033[0;0m"
 
+
 def change(s):
     # Links.
     s = repl("\[\[([^\[\]]*)\|([^\[\]]*)\]\]", BLUE + "\\2" + RESET, s)
@@ -22,7 +23,8 @@ def change(s):
     # Bold / italic
     s = repl("'''([^']*)'''", BOLD + "\\1" + RESET, s)
     s = repl("''([^']*)''", ITALIC + "\\1" + RESET, s)
-    # Annoying references:
+    # Annoying references - yeah, I know XML is not parsable by regex, but this
+    # is better than nothing ^_^'
     s = repl("<ref([^<]*)</ref>", "", s)
     s = repl("<ref([^>]*)/>", "", s)
     return s
