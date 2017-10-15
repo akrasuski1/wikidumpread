@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 
-import re, sys
+import re, sys, html
 
 
 def repl(a, b, s):
@@ -27,6 +27,8 @@ def change(s):
     # is better than nothing ^_^'
     s = repl("<ref([^<]*)</ref>", "", s)
     s = repl("<ref([^>]*)/>", "", s)
+
+    s = html.unescape(s)
     return s
 
 
